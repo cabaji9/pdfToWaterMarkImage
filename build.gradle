@@ -1,0 +1,16 @@
+group 'pdfToImage'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.ghost4j', name: 'ghost4j', version: '1.0.0'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
