@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ public class testImage {
 
     public static void main(String args[]) throws Exception
     {
-        String text = "SUPER PRUEBA";
+        String text = "PRODUBANCO";
 
         PDFDocument document = new PDFDocument();
         document.load(new File("/Users/User/Downloads/PagareOrdenTasaFijaD201708020901086465.pdf"));
@@ -28,21 +29,31 @@ public class testImage {
 
 
         // set resolution (in DPI)
-        renderer.setResolution(300);
+        renderer.setResolution(100);
 
         List<Image> images = renderer.render(document);
+
+        List<BufferedImage> imagesWaterMarked = new ArrayList<>();
 
         for (int i = 0; i < images.size(); i++) {
 
             Image image =    images.get(i);
             BufferedImage bufferedImage= addWaterMark(image,text);
-
+            imagesWaterMarked.add(bufferedImage);
             ImageIO.write(bufferedImage, "png", new File((i + 1) + ".png"));
+
         }
 
-
-
-
+        BufferedImage concatenatedImage = null;
+        for (int i = 0; i < imagesWaterMarked.size(); i++) {
+            if(i == 0){
+                concatenatedImage = imagesWaterMarked.get(i);
+            }
+            else{
+                concatenatedImage =concatenateImages(concatenatedImage,imagesWaterMarked.get(i));
+            }
+        }
+        ImageIO.write(concatenatedImage, "png", new File( "final.png"));
     }
 
 
@@ -52,11 +63,11 @@ public class testImage {
         BufferedImage bufferedImage = new BufferedImage(image.getWidth(null),
                 image.getHeight(null), BufferedImage.TYPE_INT_RGB);
 
-        Integer fontSize = 400;
+        Integer fontSize = 200;
 
         Graphics graphics = bufferedImage.getGraphics();
         graphics.drawImage(image, 0, 0, null);
-        graphics.setColor(new Color(192,192,192,100));
+        graphics.setColor(new Color(192,192,192,80));
         // set font for the watermark text
         graphics.setFont(rotateFont(fontSize));
 
@@ -80,5 +91,18 @@ public class testImage {
         affineTransform.rotate(Math.toRadians(45), 0, 0);
         return  font.deriveFont(affineTransform);
 
+    }
+
+
+    private static BufferedImage concatenateImages(BufferedImage parent, BufferedImage toAdd){
+
+        BufferedImage img = new BufferedImage(
+                parent.getWidth(),
+                parent.getHeight()+toAdd.getHeight(), // addition of widths and heights of the images we already have
+                BufferedImage.TYPE_INT_RGB);
+
+        img.createGraphics().drawImage(parent, 0, 0, null); // 0, 0 are the x and y positions
+        img.createGraphics().drawImage(toAdd, 0, parent.getHeight(), null); // here width is mentioned as width of
+        return img;
     }
 }
